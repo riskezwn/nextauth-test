@@ -30,6 +30,35 @@ export const authOptions = {
   pages: {
     signIn: '/auth/login',
     newUser: '/auth/register'
-  }
+  },
+  callbacks: {
+    async jwt({ token, account, user }: any) {
+      if (account?.access_token) {
+        token.accessToken = account.access_token;
+      }
+      if (account) {
+        switch (account.type) {
+          case 'oauth': {
+            token.user = user;
+            break;
+          }
+          case 'credentials':
+            token.user = user;
+            break;
+          default:
+            break;
+        }
+      }
+      return token;
+    },
+    async session({ session: userSession, token }: any) {
+      const session: any = userSession;
+      if (token?.accesToken) {
+        session.accessToken = token.accessToken;
+      }
+      return session;
+    },
+  },
 }
+
 export default NextAuth(authOptions)
